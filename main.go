@@ -1,0 +1,51 @@
+package main
+
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+type album struct {
+	ID     string  `json:"id"`
+	Title  string  `json:"title"`
+	Artist string  `json:"artist"`
+	Price  float64 `json:"price"`
+}
+
+// albums slice to seed record album data.
+var albums = []album{
+	{ID: "1", Title: "Blue Train", Artist: "John Coltrane", Price: 56.99},
+	{ID: "2", Title: "Jeru", Artist: "Gerry Mulligan", Price: 17.99},
+	{ID: "3", Title: "Sarah Vaughan and Clifford Brown", Artist: "Sarah Vaughan", Price: 39.99},
+}
+
+func main() {
+	// initialize the router
+	router := gin.Default()
+
+	// creates an association between route and endpoint
+	router.GET("/albums", getAlbums)
+	router.POST("/albums", postAlbum)
+
+	// attatches a httpserver to router and runs it
+	router.Run("localhost:8080")
+}
+
+// returns JSON of all the albums
+func getAlbums(c *gin.Context) {
+	c.IndentedJSON(http.StatusOK, albums)
+}
+
+// adds an album to the albums
+func postAlbum(c *gin.Context) {
+	var newAlbum album
+
+	// if the bindjson is successful err will be nill
+	if err := c.BindJSON(&newAlbum); err != nil {
+		return
+	}
+
+	albums = append(albums, newAlbum)
+	c.IndentedJSON(http.StatusCreated, newAlbum)
+}
